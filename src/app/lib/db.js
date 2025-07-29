@@ -1,0 +1,1 @@
+export const connectionStr = 'mongodb+srv://gillu:tarka123@cluster0.dhimlmh.mongodb.net/TK?retryWrites=true&w=majority&appName=Cluster0'
