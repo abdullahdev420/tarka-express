@@ -11,6 +11,7 @@ export default function Header() {
   const [hasCartItems, setHasCartItems] = useState(false);
   const router = useRouter();
 
+  // Check localStorage for user/cart
   const checkAuthAndCart = () => {
     const storedUser = localStorage.getItem("user");
     setUser(storedUser ? JSON.parse(storedUser) : null);
@@ -22,37 +23,35 @@ export default function Header() {
   useEffect(() => {
     checkAuthAndCart();
 
-    // Watch for storage changes (even from other tabs)
-    window.addEventListener("storage", checkAuthAndCart);
+    const handleStorageChange = () => {
+      checkAuthAndCart();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener("storage", checkAuthAndCart);
+      window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+  }, [router]); // ✅ added router to dependency (used in handleLogOut)
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("cart"); // Optional: clear cart too
-    checkAuthAndCart(); // Refresh UI
+    localStorage.removeItem("cart");
+    checkAuthAndCart();
     router.push("/");
   };
 
   return (
     <header className="bg-gradient-to-r from-orange-500 to-yellow-400 text-white shadow-md fixed top-0 w-full z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
         <Link href="/" className="text-2xl font-extrabold tracking-widest">
           Tarka<span className="text-yellow-100">Express</span>
         </Link>
 
-        {/* Desktop Menu */}
         <nav className="hidden md:flex gap-6 text-lg font-medium items-center">
-          <Link href="/" className="hover:text-yellow-100">
-            Home
-          </Link>
-          <Link href="/restaurents" className="hover:text-yellow-100">
-            Restaurants
-          </Link>
+          <Link href="/" className="hover:text-yellow-100">Home</Link>
+          <Link href="/restaurents" className="hover:text-yellow-100">Restaurants</Link>
+
           {user && hasCartItems && (
             <Link
               href="/cart"
@@ -61,6 +60,7 @@ export default function Header() {
               🛒 View Cart
             </Link>
           )}
+
           {user ? (
             <button onClick={handleLogOut} className="hover:text-yellow-100">
               Log out
@@ -72,7 +72,6 @@ export default function Header() {
           )}
         </nav>
 
-        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -80,23 +79,15 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {isOpen && (
         <div className="md:hidden bg-orange-600 px-6 pb-4 pt-2 space-y-2 text-lg font-medium">
-          <Link
-            href="/"
-            onClick={() => setIsOpen(false)}
-            className="block text-white hover:text-yellow-100"
-          >
+          <Link href="/" onClick={() => setIsOpen(false)} className="block text-white hover:text-yellow-100">
             Home
           </Link>
-          <Link
-            href="/restaurents"
-            onClick={() => setIsOpen(false)}
-            className="block text-white hover:text-yellow-100"
-          >
+          <Link href="/restaurents" onClick={() => setIsOpen(false)} className="block text-white hover:text-yellow-100">
             Restaurants
           </Link>
+
           {user && hasCartItems && (
             <Link
               href="/cart"
@@ -106,6 +97,7 @@ export default function Header() {
               🛒 View Cart
             </Link>
           )}
+
           {user ? (
             <button
               onClick={() => {
@@ -117,11 +109,7 @@ export default function Header() {
               Log out
             </button>
           ) : (
-            <Link
-              href="/login"
-              onClick={() => setIsOpen(false)}
-              className="block text-white hover:text-yellow-100"
-            >
+            <Link href="/login" onClick={() => setIsOpen(false)} className="block text-white hover:text-yellow-100">
               Log in
             </Link>
           )}

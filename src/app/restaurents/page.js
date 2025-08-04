@@ -6,20 +6,26 @@ import Header from "../components/Header";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-const page = () => {
-  const [restaurents, setRestaurents] = useState([]);
+export default function Page() {
+  const [restaurants, setRestaurants] = useState([]);
 
   useEffect(() => {
-    loadAllRestaurents();
+    loadAllRestaurants();
   }, []);
 
-  const loadAllRestaurents = async () => {
-    let response = await fetch("http://localhost:3000/api/allrestaurents");
-    response = await response.json();
-    if (response.result) {
-      setRestaurents(response.result);
-    } else {
-      alert("Error");
+  const loadAllRestaurants = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/allrestaurents");
+      const data = await res.json();
+
+      if (data.result) {
+        setRestaurants(data.result);
+      } else {
+        alert("No restaurants found.");
+      }
+    } catch (error) {
+      console.error("Failed to load restaurants:", error);
+      alert("Something went wrong while fetching data.");
     }
   };
 
@@ -29,13 +35,13 @@ const page = () => {
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">Restaurants</h1>
 
-        {restaurents.length === 0 ? (
+        {restaurants.length === 0 ? (
           <p>No restaurants found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {restaurents.map((item, index) => (
+            {restaurants.map((item, index) => (
               <motion.div
-                key={index}
+                key={item._id}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -64,6 +70,4 @@ const page = () => {
       <Footer />
     </>
   );
-};
-
-export default page;
+}

@@ -9,7 +9,7 @@ const Page = () => {
   const [foods, setFoods] = useState([]);
   const [isAuthorized, setIsAuthorized] = useState(null);
   const params = useParams();
-  const restaurentId = params.id;
+  const restaurentId = params?.id;
   const router = useRouter();
 
   useEffect(() => {
@@ -19,42 +19,51 @@ const Page = () => {
     } else {
       setIsAuthorized(true);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!isAuthorized || !restaurentId) return;
 
-    async function loadFoods() {
+    const loadFoods = async () => {
       try {
         const res = await fetch(`/api/foods/${restaurentId}`);
         const data = await res.json();
-        setFoods(data.result);
+        if (data?.result) {
+          setFoods(data.result);
+        } else {
+          console.error("Invalid data format");
+        }
       } catch (error) {
-        console.error("Failed to fetch foods", error);
+        console.error("Failed to fetch foods:", error);
       }
-    }
+    };
 
     loadFoods();
   }, [isAuthorized, restaurentId]);
 
   const handleAddToCart = (food) => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const exists = cart.find((item) => item.id === food._id);
-    if (exists) {
-      exists.quantity += 1;
-    } else {
-      cart.push({
-        id: food._id,
-        name: food.name,
-        price: food.price,
-        image: food.image,
-        quantity: 1,
-      });
-    }
+    try {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existingItem = cart.find((item) => item.id === food._id);
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${food.name} added to cart!`);
-    router.push("/cart");
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          id: food._id,
+          name: food.name,
+          price: food.price,
+          image: food.image,
+          quantity: 1,
+        });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert(`${food.name} added to cart!`);
+      router.push("/cart");
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+    }
   };
 
   if (isAuthorized === null) return null;
@@ -83,7 +92,7 @@ const Page = () => {
             >
               <img
                 src={food.image}
-                alt="No Image to Show right now"
+                alt={food.name || "Food image"}
                 className="w-full h-48 object-cover"
               />
               <div className="p-4 flex flex-col flex-grow">

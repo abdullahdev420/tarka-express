@@ -17,7 +17,7 @@ export default function LoginPage() {
     if (user) {
       router.push("/");
     }
-  }, []);
+  }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,12 +25,11 @@ export default function LoginPage() {
     if (!email || !password) {
       setError(true);
       return;
-    } else {
-      setError(false);
     }
+    setError(false);
 
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +77,6 @@ export default function LoginPage() {
                 className="w-full px-4 py-2 mt-1 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
             <div>
@@ -90,7 +88,6 @@ export default function LoginPage() {
                 className="w-full px-4 py-2 mt-1 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
             </div>
             <motion.button
@@ -102,11 +99,13 @@ export default function LoginPage() {
               Login
             </motion.button>
           </form>
+
           {error && (
             <p className="text-red-600 text-sm mt-2 text-center">
               Please enter both email and password
             </p>
           )}
+
           <p className="text-sm text-center mt-4">
             Don't have an account?{" "}
             <a href="/signup" className="text-blue-600 hover:underline">

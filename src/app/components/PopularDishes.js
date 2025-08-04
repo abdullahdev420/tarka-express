@@ -1,5 +1,7 @@
 "use client";
+
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const PopularDishes = () => {
   const dishes = [
@@ -45,9 +47,11 @@ const PopularDishes = () => {
             transition={{ delay: index * 0.2, duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <img
+            <Image
               src={dish.img}
               alt={dish.name}
+              width={400}
+              height={250}
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
